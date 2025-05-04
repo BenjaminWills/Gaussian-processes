@@ -25,11 +25,6 @@ def condition_gaussian(
 ) -> tuple:
     # Aim to work out P(X | Y)
 
-    # Partition the covariance matrix into blocks for conditioning.
-    # we want to find Sigma X and Sigma Y
-    dim_train = len(training_data)
-    dim_test = len(testing_data)
-
     # Partition the covariance matrix (as in the markdown)
     Sigma_XX = calculate_covariance_matrix(testing_data, testing_data, kernel)
     Sigma_YY = calculate_covariance_matrix(training_data, training_data, kernel)
@@ -59,8 +54,11 @@ def sample_conditional_gaussian_process(
 
 if __name__ == "__main__":
 
-    training_vals = np.array([1, 3, 4])
-    training_outputs = np.array([1, 9, 16])
+    training_func = lambda x: np.cos(x)
+    num_training_points = 4
+    # Generate training data
+    training_vals = np.linspace(-5, 5, num_training_points)
+    training_outputs = np.array([training_func(x) for x in training_vals])
     testing_vals = np.linspace(-5, 5, 100)
 
     for i in range(4):
@@ -78,10 +76,17 @@ if __name__ == "__main__":
             label=f"Sample {i+1}",
             alpha=0.7,
         )
+    plt.plot(
+        testing_vals,
+        training_func(testing_vals),
+        color="black",
+        label="True function",
+        linestyle="dashed",
+    )
     plt.scatter(training_vals, training_outputs, color="red", label="Training data")
     plt.xlabel("x")
     plt.ylabel("Samples")
     plt.title("Samples from Gaussian with RBF covariance matrix")
     plt.legend()
-    plt.savefig("rbf_kernel_samples_.png", dpi=300)
+    plt.savefig("rbf_conditional_kernel_samples_.png", dpi=300)
     plt.show()

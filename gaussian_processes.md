@@ -98,4 +98,12 @@ $$
 \end{pmatrix}
 $$
 
+Our aim when approximating functions is given some training data $Y$ can we predict the function values for some tesing data $X$, in other words if we have the trianing pairs $(X_1,Y_1)$ and then the testing data $X_2$, we want to predict $Y_2$. Then we have that:
 
+$$
+p(Y_2|Y_1, X_1, X_2) \sim N(\Sigma_{X_2X_1}\Sigma_{X_1X_1}^{-1}Y_1, \Sigma_{X_2X_2} - \Sigma_{X_2X_1}\Sigma_{X_1X_1}^{-1}\Sigma_{X_1,X_2})
+$$
+
+Then samples taken from this are guaranteed to go through the points defined by $(X_1,Y_1)$, see the figure below:
+
+![image](rbf_conditional_kernel_samples_.png)
