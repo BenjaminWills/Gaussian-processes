@@ -101,7 +101,7 @@ $$
 Our aim when approximating functions is given some training data $Y$ can we predict the function values for some tesing data $X$, in other words if we have the trianing pairs $(X_1,Y_1)$ and then the testing data $X_2$, we want to predict $Y_2$. Then we have that:
 
 $$
-p(Y_2|Y_1, X_1, X_2) \sim N(\Sigma_{X_2X_1}\Sigma_{X_1X_1}^{-1}Y_1, \Sigma_{X_2X_2} - \Sigma_{X_2X_1}\Sigma_{X_1X_1}^{-1}\Sigma_{X_1,X_2})
+Y_2|Y_1, X_1, X_2 \sim N(\Sigma_{X_2X_1}\Sigma_{X_1X_1}^{-1}Y_1, \Sigma_{X_2X_2} - \Sigma_{X_2X_1}\Sigma_{X_1X_1}^{-1}\Sigma_{X_1,X_2})
 $$
 
 Then samples taken from this are guaranteed to go through the points defined by $(X_1,Y_1)$, see the figure below:
@@ -111,3 +111,31 @@ Then samples taken from this are guaranteed to go through the points defined by 
 We can also use the fact that the gaussian processes have uncertainty built into them to plot the mean value of the gaussian distribution and then the standard deviation around it. That looks like the following:
 
 ![image](rbf_conditional_kernel_samples_with_uncertainty_margins.png)
+
+#### Accounting for uncertainty and noise in real data
+
+In real data we see noise and uncertainty in our measurements, so we need to account for this in our funcitonal regression. In many cases when we have a set of functions that pass directly through our training points $Y$ that is unecessarily complex as we presume that the training points are perfect measurements. In the real world this assumption is most likely wrong, since most measurements contain some amount of error. To account for this we can define some error term, $\epsilon \sim N(0, \psi^2)$, then we can update our training points with this variable as follows:
+
+$$
+Y = f(X) + \epsilon
+$$
+
+Where $f(X)$ denotes the gaussian process. We can update the trianing data accordingly by adding the $\psi^2$ parameter to the covariance matrix of the joint distributoin of the testing and training data of the guassian process as follows:
+
+$$
+P_{X,Y} = \begin{pmatrix}
+    X \\ Y 
+\end{pmatrix}
+\sim N(0, \Sigma) = N{
+    \begin{pmatrix}
+        k(X,X) \ \ \ \ \ \ \ \ \ \ \ \  \ k(X,Y) \\
+        k(Y,X) \ \ \ \ k(Y,Y) + \psi^2I
+    \end{pmatrix}
+}
+$$
+
+Now applying this rule to some data with $\psi = 1$ and with the function we're trying to approximate being $f(x) = \cos(x)$, we have the following figure:
+
+![image](rbf_conditional_kernel_samples_with_uncertainty_margins_and_noisy_training_data.png)
+
+Notice how the uncertainty bounds are larger around the training points, translating the fact that there's uncertainty even in the known measurements.
