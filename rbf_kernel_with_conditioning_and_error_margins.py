@@ -52,31 +52,52 @@ def sample_conditional_gaussian_process(
     return samples
 
 
+def calculate_error_margins(
+    training_data: np.array,
+    testing_data: np.array,
+    training_outputs: np.array,
+    kernel: callable,
+) -> tuple:
+    mean, covariance_matrix = condition_gaussian(
+        training_data, testing_data, training_outputs, kernel
+    )
+    std_dev = np.sqrt(np.diag(covariance_matrix))
+    return mean, std_dev
+
+
 if __name__ == "__main__":
 
     training_func = lambda x: np.cos(x)
-    num_training_points = 5
+    num_training_points = 6
     # Generate training data
     training_vals = np.linspace(-5, 5, num_training_points)
     training_outputs = np.array([training_func(x) for x in training_vals])
     testing_vals = np.linspace(-10, 10, 100)
 
+    # Generate samples
+    means, stds = calculate_error_margins(
+        training_data=training_vals,
+        training_outputs=training_outputs,
+        testing_data=testing_vals,
+        kernel=rbf_kernel,
+    )
     plt.figure(figsize=(12, 12))
-    for i in range(5):
-        # Generate samples
-        samples = sample_conditional_gaussian_process(
-            training_data=training_vals,
-            training_outputs=training_outputs,
-            testing_data=testing_vals,
-            kernel=rbf_kernel,
-        )
-        # Plot the samples
-        plt.plot(
-            testing_vals,
-            samples,
-            label=f"Sample {i+1}",
-            alpha=0.7,
-        )
+    # Plot the samples
+    plt.plot(
+        testing_vals,
+        means,
+        label=f"Gaussian process",
+        alpha=1,
+    )
+    # Draw the uncertainty region around each point plotted
+    plt.fill_between(
+        testing_vals,
+        means - stds,
+        means + stds,
+        alpha=0.2,
+        color="green",
+        label="±1 std confidence interval",
+    )
     plt.plot(
         testing_vals,
         training_func(testing_vals),
@@ -87,7 +108,7 @@ if __name__ == "__main__":
     plt.scatter(training_vals, training_outputs, color="red", label="Training data")
     plt.xlabel("x")
     plt.ylabel("Samples")
-    plt.title("Samples from Gaussian with RBF covariance matrix")
+    plt.title("Plot of the means of the gaussian process with uncertainty margins.")
     plt.legend(loc="upper right")
-    plt.savefig("rbf_conditional_kernel_samples_.png", dpi=300)
+    plt.savefig("rbf_conditional_kernel_samples_with_uncertainty margins.png", dpi=300)
     plt.show()
