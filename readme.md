@@ -107,3 +107,7 @@ $$
 Then samples taken from this are guaranteed to go through the points defined by $(X_1,Y_1)$, see the figure below:
 
 ![image](rbf_conditional_kernel_samples_.png)
+
+We can also use the fact that the gaussian processes have uncertainty built into them to plot the mean value of the gaussian distribution and then the standard deviation around it. That looks like the following:
+
+![image](rbf_conditional_kernel_samples_with_uncertainty_margins.png)
