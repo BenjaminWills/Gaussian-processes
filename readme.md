@@ -179,6 +179,35 @@ $$
 
 We use $\epsilon$ to balance between exploration and exploitation, increasing $\epsilon$ results in querying locations with a larger $\sigma$ since we're looking for larger potential increases.
 
+
+
+##### Expected improvement
+
+The probability of improvement looked at the likeliood of improvement, but we didn't look at the realisation of that improvement. It may be more adventageous to look at the expected improvement rather than the probability. Now our acquisition function takes the form of:
+
+$$
+x_{t+1} = \argmin_x{\mathbb{E}(|\mu_{t}(x) - f(x^{\star})| \ | D_t)}
+$$
+
+Where $f$ is the surrogate function, $\mu_{t+1}(x)$ is the posterior mean of hte surrogate model evaluated at point $x$, $D_t$ is the training data thus far, and $x^{\star}$ is the actual position where $f$ takes it's maximum value. We can represent this equivalently with the assumption that we don't know the closed form of the function f:
+
+$$
+x_{t+1} = \argmin_x{\mathbb{E}(\max{(0, \mu_t(x) - f(x^+))} \ | D_t)}
+$$
+
+Then for a gaussian process we can express the expected improvement as shown below:
+
+$$
+EI(x) = \begin{cases}
+    (\mu_t(x) - f(x^+) - \epsilon)\Phi(Z) + \sigma_t(x)\phi(Z), \text{if} \  \sigma_t(x) > 0 \\ 
+    0, \text{if} \ \sigma_t(x) = 0
+\end{cases}
+\\
+Z = \frac{\mu_t(x) - f(x^+) - \epsilon}{\sigma_t(x)}
+$$
+
+Where $\Phi$ is the gaussian CDF and $\phi$ is the gaussian PDF.
+
 ### Multi dimensional gaussians [WIP]
 
 We've seen how to use gaussians in one dimension, now how can we generalise this notion to multiple dimesions. This is useful as most prediciton tasks will require multiple outputs from a gaussian process such as temperature, pressure or wind speed - or alternatively in machine learning, we may be wanting to find the ideal learning rate and temperature for our transformer. This will come in very handy when we look into optimisation using gaussian processes later on in this research doc.
