@@ -208,6 +208,20 @@ $$
 
 Where $\Phi$ is the gaussian CDF and $\phi$ is the gaussian PDF.
 
+Using expected improvement to optimise a quadratic with form $f(x) =-x^5 + 10$ we get the following gaussian process approximation:
+
+![image](baysean_optimisation_gaussian_fit_to_showcase.png)
+
+Notice how this time the curve doesn't fit perfectly at all, arguably it is not a good fit. That is because our objective here is to maximise a function, and we're sampling points trategically to do this. Further, note the density of points at the top of the curve, this shows that the sampling strategy of expected improvement is working correctly and is sampling points that lead to a high improvement. Lets take a look at the acquisition function now:
+
+![image](aquisition_function_to_showcase.png)
+
+This is the state of the aquisition function at the end of the optimisation process, we can clearly see that it peaks at x = 0, which means that the next point sampled would correspond to that point - which would be correct. 
+
+#### Footnote on Baysean optimisation
+
+This shows the power of baysean optimisation, it allows for optimisations of functions that are expensive to run by sampling points in an inteligent way that reduces the total number of runs required for the given function. Do note, however, that this method is not infallable, there are many issues such as choosing a surrogate function, choosing a starting point, defining the bounds of the search and not to mention in the case of gaussian processes the scalability of the method. In general it is VERY cool, but not super scalable in it's classical form.
+
 ### Multi dimensional gaussians [WIP]
 
 We've seen how to use gaussians in one dimension, now how can we generalise this notion to multiple dimesions. This is useful as most prediciton tasks will require multiple outputs from a gaussian process such as temperature, pressure or wind speed - or alternatively in machine learning, we may be wanting to find the ideal learning rate and temperature for our transformer. This will come in very handy when we look into optimisation using gaussian processes later on in this research doc.
