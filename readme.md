@@ -139,3 +139,47 @@ Now applying this rule to some data with $\psi = 1$ and with the function we're 
 ![image](rbf_conditional_kernel_samples_with_uncertainty_margins_and_noisy_training_data.png)
 
 Notice how the uncertainty bounds are larger around the training points, translating the fact that there's uncertainty even in the known measurements.
+
+### Gaussian optimisation
+
+Baysean optimisation is a probabalistic method of optimising functions, we require something called a _surrogate model_ of a true function $f$ which we define as $f$'s **prior** distribution. We then have a set of observations (which we've been calling $Y$) that we can use with Bayes rule to obtain the **posterior** distribution. Then we can use something called an _aquisition function_ $\alpha(x)$, which is a function of the posterior, to decide the next point to sample, i.e. $x_t = \argmax_x \alpha(x)$. Once we've found a new $x_t$ we can evaluate our function $f(x_t)$ and add it to $Y$ and repeat the calculation of the posterior distribution. From this point we repeat this process until the observations converge, or the iteration limit is expended.
+
+Note that this optimisation is meant to be used for expensive functions, such as neural networks that require a lot of compute to run, therefore the optimisation points need to  be chosen strategically.
+
+#### Acquisition functions
+
+It's all well and good defining what an acquisition function is, but what on Earth could this be? How can we sample points in an inteligent way using it?
+
+##### Probability of Improvement
+
+This acquisition function chooses the next query point as the one with the highest probability of improvement over the current maximum (according to the posterior distribution).  This looks like:
+
+$$
+x_{t+1} = \argmax_x(\alpha_{PI}(x)) = \argmax_x(\mathbb{P}(f(x) \geq f(x^+) + \epsilon))
+$$
+
+Where $x^+ = \argmax_{x \in X_1}f(x)$, $\epsilon$ is a small positive number.
+
+We canr reframe this probability as just looking at the upper tail of the surrogate posterior, we can manipulate as follows:
+
+$$
+\mathbb{P}(f(x) \geq f(x^+) + \epsilon) = \mathbb{P}(f(x) - f(x^+) - \epsilon \geq 0) = \Phi{\begin{pmatrix}
+    \frac{\mu_t(x) - f(x^+) - \epsilon}{\sigma_t(x)}
+\end{pmatrix}
+}
+$$
+
+Where $\Phi$ is the CDF of the surrogate (if it's a gaussian process) of the posterior, and the interior just centers the distribution around zero. $\mu_t(x)$ is the mean of the gaussian process at step $t$ and point $x$, and $\sigma_t(x)$ is the standard deviation of the process at step $t$ and point $x$. So our optimisation becomes:
+
+$$
+x_{t+1} = \argmax_x\Phi{\begin{pmatrix}
+    \frac{\mu_t(x) - f(x^+) - \epsilon}{\sigma_t(x)}
+\end{pmatrix}}
+$$
+
+We use $\epsilon$ to balance between exploration and exploitation, increasing $\epsilon$ results in querying locations with a larger $\sigma$ since we're looking for larger potential increases.
+
+### Multi dimensional gaussians [WIP]
+
+We've seen how to use gaussians in one dimension, now how can we generalise this notion to multiple dimesions. This is useful as most prediciton tasks will require multiple outputs from a gaussian process such as temperature, pressure or wind speed - or alternatively in machine learning, we may be wanting to find the ideal learning rate and temperature for our transformer. This will come in very handy when we look into optimisation using gaussian processes later on in this research doc.
+
