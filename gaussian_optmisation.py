@@ -143,8 +143,8 @@ if __name__ == "__main__":
 
     optimiser = One_d_gaussian_process_optimiser(
         evaluation_function=func,
-        lower_bound=-10,
-        upper_bound=20,
+        lower_bound=-5,
+        upper_bound=5,
         kernel=rbf_kernel,
         aqcuisition_function=expected_improvement,
     )
@@ -161,5 +161,21 @@ if __name__ == "__main__":
     max_y = np.max(training_outputs)
     print(f"Maximum value found: {max_y} at x = {max_x}")
 
+    # Plot the acquisition function at the end
+    plt.plot(
+        fitted_gaussian_process.testing_range,
+        [
+            expected_improvement(x, fitted_gaussian_process, max_y)
+            for x in fitted_gaussian_process.testing_range
+        ],
+        label="Acquisition function",
+        color="green",
+    )
+    plt.xlabel("x value")
+    plt.ylabel("Aquisition function value, higher is better")
+    plt.title("Acquisition function")
+    plt.savefig("aquisition_function.png", dpi=300)
+    plt.show()
+
     # Plot the samples
-    fitted_gaussian_process.visualise(func)
+    fitted_gaussian_process.visualise(func, save=True)
