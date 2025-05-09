@@ -139,12 +139,12 @@ class One_d_gaussian_process:
 
 
 if __name__ == "__main__":
-    training_func = lambda x: x * np.cos(x)
+    training_func = lambda x: x**2 + 3 * x + 1
 
     # Generate training data
-    training_vals = np.linspace(-15, 15, 300)
+    training_vals = np.linspace(-20, 20, 300)
     # Randomly sample training points from a big list
-    num_training_points = 12
+    num_training_points = 30
     training_vals = np.random.choice(training_vals, num_training_points, replace=False)
     training_outputs = np.array([training_func(x) for x in training_vals])
 
@@ -156,9 +156,7 @@ if __name__ == "__main__":
         training_inputs=training_vals,
         training_outputs=training_outputs,
         testing_range=testing_vals,
-        kernel=lambda x1, x2: periodic_kernel(
-            x1, x2, length_scale=1, period=2, variance=0.1
-        ),
+        kernel=rbf_kernel,
         noise=1e-50,
     )
     # Plot the gaussian process
