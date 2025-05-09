@@ -49,6 +49,9 @@ class One_d_gaussian_process:
         self.kernel = kernel
         self.noise = noise
 
+        # Define the matrices
+        self.conditioned_mean, self.conditioned_covariance = self.condition_gaussian()
+
     def condition_gaussian(
         self,
     ) -> tuple:
@@ -77,14 +80,14 @@ class One_d_gaussian_process:
         return conditioned_mean, conditioned_covariance
 
     def calculate_error_margins(self) -> tuple:
-        mean, covariance_matrix = self.condition_gaussian()
-        std_dev = np.sqrt(np.diag(covariance_matrix))
-        return mean, std_dev
+        std_dev = np.sqrt(np.diag(self.conditioned_covariance))
+        return self.conditioned_mean, std_dev
 
     def sample_gaussian_process(self) -> np.array:
         # Define covariance matrix
-        mean, covariance_matrix = self.condition_gaussian()
-        samples = np.random.multivariate_normal(mean, covariance_matrix)
+        samples = np.random.multivariate_normal(
+            self.conditioned_mean, self.conditioned_covariance
+        )
         return samples
 
     def visualise(self, true_func: callable = None) -> None:
