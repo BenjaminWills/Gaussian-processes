@@ -90,7 +90,7 @@ class One_d_gaussian_process:
         )
         return samples
 
-    def visualise(self, true_func: callable = None) -> None:
+    def visualise(self, true_func: callable = None, save: bool = False) -> None:
         means, stds = self.calculate_error_margins()
         plt.figure(figsize=(12, 12))
         # Plot the samples
@@ -138,6 +138,10 @@ class One_d_gaussian_process:
             "Plot of the means of the gaussian process with uncertainty margins and noisy training data"
         )
         plt.legend(loc="upper right")
+
+        if save:
+            plt.savefig("gaussian_process.png", dpi=300)
+
         plt.show()
 
 
