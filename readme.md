@@ -179,6 +179,16 @@ $$
 
 We use $\epsilon$ to balance between exploration and exploitation, increasing $\epsilon$ results in querying locations with a larger $\sigma$ since we're looking for larger potential increases.
 
+We see when we try to optimise the function $f(x) = x  \cos(x)$ on the interval $x \in [-10, 10]$ that baysean optimisation can avoid falling into local minima, understandably we can't always be certain, but we can run multiple baysean optimisation steps. We see below the function approximation:
+
+
+![image](gaussian_process_probability_of_improvement.png)
+
+Here we see that points have been sampled all over the shop, this is because of the value of epsilon corresponding to the exploration / exploitation tradeoff - this also hgihlights a key benefit of using this method over classical methods such as gradient descent. below this the aquisition function at the sampled points:
+
+![image](aquisition_function_probability_of_improvement.png)
+
+Notice how here the probability swells around $ x  = - 3\pi$ which gives the maximum value in this range.
 
 
 ##### Expected improvement
