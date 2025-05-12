@@ -8,7 +8,7 @@ def probability_of_improvement(
     x: float,
     gaussian_process: One_d_gaussian_process,
     maximium_function_value: float,
-    epislon: float = 0.3,
+    epsilon: float = 0.3,
 ) -> float:
     """This function is used to calculate the probability of improvement for
     a gaussian process. It can be used to find optimal points.
@@ -21,7 +21,7 @@ def probability_of_improvement(
         The gaussian process at the given timestamp.
     maximium_function_value : float
         The maximum value of the function at the given timestamp.
-    epislon : float, optional
+    epsilon : float, optional
         The exploration / exploitation trade off. High epsilon means
         high amounts of exploitation in regions with high
         standard deviation, by default 0.3
@@ -39,7 +39,7 @@ def probability_of_improvement(
     variance = gaussian_process.conditioned_covariance[index, index]
 
     # Normalise the probability
-    z = (mean - maximium_function_value - epislon) / np.sqrt(variance)
+    z = (mean - maximium_function_value - epsilon) / np.sqrt(variance)
 
     # Return the probability of improvement
     return norm.cdf(z)
@@ -62,7 +62,7 @@ def expected_improvement(
         The gaussian process at the given timestamp.
     maximium_function_value : float
         The maximum value of the function at the given timestamp.
-    epislon : float, optional
+    epsilon : float, optional
         The exploration / exploitation trade off. High epsilon means
         high amounts of exploitation in regions with high
         standard deviation, by default 0.3
