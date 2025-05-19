@@ -12,7 +12,7 @@ $$p_X(x;\mu,\sigma) = \frac{1}{\sqrt{2\pi}\sigma}e^{-\frac{(x-\mu)^2}{2\sigma^2}
 
 If some data $X$ is distributed normally we say that $X$ ~ $N(\mu, \sigma^2)$. The below image shows a normal distribution with some interesting parts indicated.
 
-![image](1d_gaussian.png) 
+![image](images/1d_gaussian.png) 
 
 In higher dimensions we can define gaussians too, in 3d it looks like a bell, and as the dimensions increase it becomes harder to visualise, A 2 dimensional gaussian can be defined by two quantities:
 
@@ -21,7 +21,7 @@ In higher dimensions we can define gaussians too, in 3d it looks like a bell, an
 
 The correlations between the variables define the shape of the normal distribution. See the plot below.
 
-![image](2d_gaussian.png)
+![image](images/2d_gaussian.png)
 
 ## Marginalisaiton and conditioning of the Gaussian
 
@@ -67,7 +67,7 @@ So we can calculate the $i,j$ component of the covariance matrix $\Sigma_{ij} = 
 
 We can then take a vector of points $X$ with some dimensionality, $N$, and calculate the covariance matrix by looping over these points pairwise. This essentially allows us to shape the gaussian distribution with a certain kernel. We then take the output of the distribution we can treat each entry as a function value, see the figure below.
 
-![image](rbf_kernel_samples.png)
+![image](images/rbf_kernel_samples.png)
 
 Given a set of values we can then generate random functions from these covariance matrices.
 
@@ -106,11 +106,11 @@ $$
 
 Then samples taken from this are guaranteed to go through the points defined by $(X_1,Y_1)$, see the figure below:
 
-![image](rbf_conditional_kernel_samples_.png)
+![image](images/rbf_conditional_kernel_samples_.png)
 
 We can also use the fact that the gaussian processes have uncertainty built into them to plot the mean value of the gaussian distribution and then the standard deviation around it. That looks like the following:
 
-![image](rbf_conditional_kernel_samples_with_uncertainty_margins.png)
+![image](images/rbf_conditional_kernel_samples_with_uncertainty_margins.png)
 
 #### Accounting for uncertainty and noise in real data
 
@@ -136,7 +136,7 @@ $$
 
 Now applying this rule to some data with $\psi = 1$ and with the function we're trying to approximate being $f(x) = \cos(x)$, we have the following figure:
 
-![image](rbf_conditional_kernel_samples_with_uncertainty_margins_and_noisy_training_data.png)
+![image](images/rbf_conditional_kernel_samples_with_uncertainty_margins_and_noisy_training_data.png)
 
 Notice how the uncertainty bounds are larger around the training points, translating the fact that there's uncertainty even in the known measurements.
 
@@ -182,11 +182,11 @@ We use $\epsilon$ to balance between exploration and exploitation, increasing $\
 We see when we try to optimise the function $f(x) = x  \cos(x)$ on the interval $x \in [-10, 10]$ that baysean optimisation can avoid falling into local minima, understandably we can't always be certain, but we can run multiple baysean optimisation steps. We see below the function approximation:
 
 
-![image](gaussian_process_probability_of_improvement.png)
+![image](images/gaussian_process_probability_of_improvement.png)
 
 Here we see that points have been sampled all over the shop, this is because of the value of epsilon corresponding to the exploration / exploitation tradeoff - this also hgihlights a key benefit of using this method over classical methods such as gradient descent. below this the aquisition function at the sampled points:
 
-![image](aquisition_function_probability_of_improvement.png)
+![image](images/aquisition_function_probability_of_improvement.png)
 
 Notice how here the probability swells around $ x  = - 3\pi$ which gives the maximum value in this range.
 
@@ -220,11 +220,11 @@ Where $\Phi$ is the gaussian CDF and $\phi$ is the gaussian PDF.
 
 Using expected improvement to optimise a quadratic with form $f(x) =-x^5 + 10$ we get the following gaussian process approximation:
 
-![image](baysean_optimisation_gaussian_fit_to_showcase.png)
+![image](images/baysean_optimisation_gaussian_fit_to_showcase.png)
 
 Notice how this time the curve doesn't fit perfectly at all, arguably it is not a good fit. That is because our objective here is to maximise a function, and we're sampling points trategically to do this. Further, note the density of points at the top of the curve, this shows that the sampling strategy of expected improvement is working correctly and is sampling points that lead to a high improvement. Lets take a look at the acquisition function now:
 
-![image](aquisition_function_to_showcase.png)
+![image](images/aquisition_function_to_showcase.png)
 
 This is the state of the aquisition function at the end of the optimisation process, we can clearly see that it peaks at x = 0, which means that the next point sampled would correspond to that point - which would be correct. 
 

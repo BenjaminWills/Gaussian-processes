@@ -9,6 +9,7 @@ from acquisition_functions import (
     expected_improvement,
 )
 from kernels import rbf_kernel
+from matplotlib.widgets import Slider
 
 
 class One_d_gaussian_process_optimiser:
@@ -123,6 +124,10 @@ class One_d_gaussian_process_optimiser:
         # Make stagnation iteration counter
         stagnation_counter = 0
 
+        # For animation
+        gaussian_processes = []
+        max_ys = []
+
         for iteration in tqdm(range(max_iterations), desc="Iteration number: "):
 
             # Find the current maximum value
@@ -134,6 +139,10 @@ class One_d_gaussian_process_optimiser:
                 acquisition_function=self.acquisition_function,
                 maximum_value=maximum_func_value,
             )
+
+            # Append the current gaussian process to the list
+            gaussian_processes.append(fitted_gaussian_process)
+            max_ys.append(maximum_func_value)
 
             # Update the training arrays
             training_data = np.append(training_data, next_point)
@@ -162,50 +171,148 @@ class One_d_gaussian_process_optimiser:
                 testing_range=testing_range,
                 kernel=self.kernel,
             )
-        return fitted_gaussian_process, training_data, training_outputs
+        return (
+            fitted_gaussian_process,
+            training_data,
+            training_outputs,
+            gaussian_processes,
+            max_ys,
+        )
+
+
+def make_gif_of_optimisation(
+    gaussian_processes, max_ys, function, acquisition_function
+):
+    # Create a 1 by 2 subplot
+    fig, ax = plt.subplots(2, 1, figsize=(12, 6))
+    plt.subplots_adjust(bottom=0.2)
+
+    # Add a slider for selecting the index
+    ax_slider = plt.axes([0.2, 0.05, 0.6, 0.03], facecolor="lightgoldenrodyellow")
+    slider = Slider(
+        ax_slider,
+        "Index",
+        0,
+        len(gaussian_processes) - 1,
+        valinit=0,
+        valstep=1,
+    )
+
+    def update_plot(index):
+        index = int(index)
+        # Clear the plots
+        ax[0].cla()
+        ax[1].cla()
+
+        # Plot the gaussian process
+        means, stds = gaussian_processes[index].calculate_error_margins()
+        ax[0].plot(
+            gaussian_processes[index].testing_range,
+            means,
+            label=f"Gaussian process",
+            color="green",
+            alpha=1,
+        )
+        ax[0].fill_between(
+            gaussian_processes[index].testing_range,
+            means - stds,
+            means + stds,
+            alpha=0.2,
+            color="green",
+            label="± 1 $\sigma$ confidence interval",
+        )
+        ax[0].scatter(
+            gaussian_processes[index].training_inputs,
+            gaussian_processes[index].training_outputs,
+            color="red",
+            label="Training data",
+        )
+        ax[0].set_title("Gaussian process")
+        if function is not None:
+            ax[0].plot(
+                gaussian_processes[index].testing_range,
+                [function(x) for x in gaussian_processes[index].testing_range],
+                label="True function",
+                color="blue",
+                linestyle="dashed",
+            )
+
+        ax[0].set_xlabel("x")
+        ax[0].set_ylabel("Samples")
+        ax[0].legend(loc="upper right")
+
+        # Plot the acquisition function
+        ax[1].plot(
+            gaussian_processes[index].testing_range,
+            [
+                acquisition_function(x, gaussian_processes[index], max_ys[index])
+                for x in gaussian_processes[index].testing_range
+            ],
+            label="Acquisition function",
+            color="green",
+        )
+        ax[1].set_title("Acquisition function")
+
+        # Redraw the figure
+        fig.canvas.draw_idle()
+
+    # Initialize the plot
+    update_plot(0)
+
+    # Connect the slider to the update function
+    slider.on_changed(update_plot)
+
+    plt.show()
 
 
 if __name__ == "__main__":
     # Define a function to be optimised
     def func(x):
-        return x * np.cos(x)
+        return -0.1 * x**2 - 0.3 * x + 5 * np.sin(3 * x)
 
     optimiser = One_d_gaussian_process_optimiser(
         evaluation_function=func,
         lower_bound=-10,
         upper_bound=10,
         kernel=rbf_kernel,
-        aqcuisition_function=probability_of_improvement,
+        aqcuisition_function=expected_improvement,
         epsilon=1,
     )
 
-    fitted_gaussian_process, training_data, training_outputs = optimiser.optimise(
-        max_iterations=100
-    )
+    (
+        fitted_gaussian_process,
+        training_data,
+        training_outputs,
+        gaussian_processes,
+        max_ys,
+    ) = optimiser.optimise(max_iterations=100)
 
-    # Plot the results
-    plt.figure(figsize=(12, 12))
+    # Make a gif of the optimisation process
+    make_gif_of_optimisation(gaussian_processes, max_ys, func, expected_improvement)
 
-    # Plot the maximum value
-    max_x = training_data[np.argmax(training_outputs)]
-    max_y = np.max(training_outputs)
-    print(f"Maximum value found: {max_y} at x = {max_x}")
+    # # Plot the results
+    # plt.figure(figsize=(12, 12))
 
-    # Plot the acquisition function at the end
-    plt.plot(
-        fitted_gaussian_process.testing_range,
-        [
-            probability_of_improvement(x, fitted_gaussian_process, max_y)
-            for x in fitted_gaussian_process.testing_range
-        ],
-        label="Acquisition function",
-        color="green",
-    )
-    plt.xlabel("x value")
-    plt.ylabel("Aquisition function value, higher is better")
-    plt.title("Acquisition function")
-    plt.savefig("aquisition_function.png", dpi=300)
-    plt.show()
+    # # Plot the maximum value
+    # max_x = training_data[np.argmax(training_outputs)]
+    # max_y = np.max(training_outputs)
+    # print(f"Maximum value found: {max_y} at x = {max_x}")
 
-    # Plot the samples
-    fitted_gaussian_process.visualise(func, save=True)
+    # # Plot the acquisition function at the end
+    # plt.plot(
+    #     fitted_gaussian_process.testing_range,
+    #     [
+    #         probability_of_improvement(x, fitted_gaussian_process, max_y)
+    #         for x in fitted_gaussian_process.testing_range
+    #     ],
+    #     label="Acquisition function",
+    #     color="green",
+    # )
+    # plt.xlabel("x value")
+    # plt.ylabel("Aquisition function value, higher is better")
+    # plt.title("Acquisition function")
+    # plt.savefig("aquisition_function.png", dpi=300)
+    # plt.show()
+
+    # # Plot the samples
+    # fitted_gaussian_process.visualise(func, save=True)
